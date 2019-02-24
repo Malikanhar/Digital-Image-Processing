@@ -159,7 +159,6 @@ function txPercentBright_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of txPercentBright as text
 %        str2double(get(hObject,'String')) returns contents of txPercentBright as a double
 
-
 % --- Executes during object creation, after setting all properties.
 function txPercentBright_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to txPercentBright (see GCBO)
@@ -172,12 +171,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in btnPercentBright.
 function btnValueBright_Callback(hObject, eventdata, handles)
 global img;
 img = double(img);
-brightVal = str2double(get(handles.txVal, 'String')); % Get the bright value from editText
+brightVal = str2double(get(handles.txValueBright, 'String')); % Get the bright value from editText
 if(brightVal > 100 || brightVal < -100) % Check if the input invalid
     msgbox('Please enter a value between -100 and 100', 'Error','error'); % Show error message
 else
@@ -194,7 +192,6 @@ function txValueBright_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of txValueBright as text
 %        str2double(get(hObject,'String')) returns contents of txValueBright as a double
 
-
 % --- Executes during object creation, after setting all properties.
 function txValueBright_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to txValueBright (see GCBO)
@@ -207,8 +204,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function txXrange_Callback(hObject, eventdata, handles)
 % hObject    handle to txXrange (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -216,7 +211,6 @@ function txXrange_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of txXrange as text
 %        str2double(get(hObject,'String')) returns contents of txXrange as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function txXrange_CreateFcn(hObject, eventdata, handles)
@@ -230,8 +224,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function txYrange_Callback(hObject, eventdata, handles)
 % hObject    handle to txYrange (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -239,7 +231,6 @@ function txYrange_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of txYrange as text
 %        str2double(get(hObject,'String')) returns contents of txYrange as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function txYrange_CreateFcn(hObject, eventdata, handles)
@@ -253,8 +244,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function txXstart_Callback(hObject, eventdata, handles)
 % hObject    handle to txXstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -262,7 +251,6 @@ function txXstart_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of txXstart as text
 %        str2double(get(hObject,'String')) returns contents of txXstart as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function txXstart_CreateFcn(hObject, eventdata, handles)
@@ -276,8 +264,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function txYstart_Callback(hObject, eventdata, handles)
 % hObject    handle to txYstart (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -285,7 +271,6 @@ function txYstart_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of txYstart as text
 %        str2double(get(hObject,'String')) returns contents of txYstart as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function txYstart_CreateFcn(hObject, eventdata, handles)
@@ -299,10 +284,26 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in btnCrop.
 function btnCrop_Callback(hObject, eventdata, handles)
-
+global img;
+xRange = str2double(get(handles.txXrange, 'String'));
+yRange = str2double(get(handles.txYrange, 'String'));
+xStart = str2double(get(handles.txXstart, 'String')); % Get the value of X Start from editText
+xEnd = str2double(get(handles.txXend, 'String')); % Get the value of X End from editText
+yStart = str2double(get(handles.txYstart, 'String')); % Get the value of Y Start from editText
+yEnd = str2double(get(handles.txYend, 'String')); % Get the value of Y End from editText
+if(xStart < 1 || xStart > xRange || xEnd < 1 || xEnd > xRange) % Check if the input invalid
+    msgbox(sprintf('Please enter a value between 0 and %s for X range', num2str(xRange)), 'Error','error'); % Show error message
+elseif(yStart < 1 || yStart > yRange || yEnd < 1 || yEnd > yRange)
+    msgbox(sprintf('Please enter a value between 0 and %s for Y range', num2str(xRange)), 'Error','error'); % Show error message
+else
+    img = double(img(xStart:xEnd, yStart:yEnd, :)); % Cropping image
+    viewImg = uint8(img);
+    set(handles.txXrange,'string',size(viewImg,1)); % Set the Xrange editText to row length
+    set(handles.txYrange,'string',size(viewImg,2)); % Set the Yrange editText to column length
+    imshow(viewImg); % Showing the image
+end
 
 function txXend_Callback(hObject, eventdata, handles)
 % hObject    handle to txXend (see GCBO)
@@ -311,7 +312,6 @@ function txXend_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of txXend as text
 %        str2double(get(hObject,'String')) returns contents of txXend as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function txXend_CreateFcn(hObject, eventdata, handles)
@@ -325,8 +325,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function txYend_Callback(hObject, eventdata, handles)
 % hObject    handle to txYend (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -334,7 +332,6 @@ function txYend_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of txYend as text
 %        str2double(get(hObject,'String')) returns contents of txYend as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function txYend_CreateFcn(hObject, eventdata, handles)
@@ -348,18 +345,66 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in btnZoomIn.
 function btnZoomIn_Callback(hObject, eventdata, handles)
-
+global img;
+% Get the zoom-in area
+img = double(img(ceil(end/4):ceil(end-end/4), ceil(end/4):ceil(end-end/4), :));
+rows = size(img,1); % Get the row length
+cols = size(img,2); % Get the column length
+zoomImg = zeros(2*rows, 2*cols, 3); % Make a new array for zoom-in image
+% Copying each pixel from original image to the zoomImg
+for i=1 : rows
+    for j=1 : cols
+        for k=(2*i)-1 : (2*i)
+            for l=(2*j)-1 : (2*j)
+                zoomImg(k, l, :) = img(i, j, :);
+            end
+        end
+    end
+end
+img = zoomImg;
+viewImg = uint8(img); % Change the image data type from double to uint8
+set(handles.txXrange,'string',size(viewImg,1)); % Set the Xrange editText to row length
+set(handles.txYrange,'string',size(viewImg,2)); % Set the Yrange editText to column length
+imshow(viewImg); % Showing the image
 
 % --- Executes on button press in btnZoomOut.
 function btnZoomOut_Callback(hObject, eventdata, handles)
-
+global img;
+rows = size(img,1); % Get the image-row length
+cols = size(img,2); % Get the image-column length
+% Adding pixel 0 to every side of image as the frame of zoom-out image
+img = double(padarray(img,[ceil(rows/2) ceil(cols/2)], 0, 'both'));
+zoomImg = zeros(rows, cols, 3); % Make a new array for zoom-in image
+% Copying each pixel from original image to the zoomImg
+for i=1 : rows
+    for j=1 : cols
+        sum = zeros(1, 1, 3);
+        for k=(2*i)-1 : (2*i)
+            for l=(2*j)-1 : (2*j)
+                sum = sum + img(k, l, :);
+            end
+            % insert 4 pixels from the original image into 1 pixel of zoom-out image
+            zoomImg(i, j, :) = floor(sum/4);
+        end
+    end
+end
+img = zoomImg;
+viewImg = uint8(img); % Change the image data type from double to uint8
+set(handles.txXrange,'string',size(viewImg,1)); % Set the Xrange editText to row length
+set(handles.txYrange,'string',size(viewImg,2)); % Set the Yrange editText to column length
+imshow(uint8(viewImg)); % Showing the image
 
 % --- Executes on button press in btnReset.
 function btnReset_Callback(hObject, eventdata, handles)
-
+global name;
+global img;
+img = imread(name); % Read the image
+axes(handles.axesImg); % Set the axes to image
+set(handles.txXrange,'string',size(img,1)); % Set the Xrange editText to row length
+set(handles.txYrange,'string',size(img,2)); % Set the Yrange editText to column length
+imshow(img); % Showing the image
 
 % --- Executes on button press in btnHisteq.
 function btnHisteq_Callback(hObject, eventdata, handles)

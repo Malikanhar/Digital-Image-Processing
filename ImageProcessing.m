@@ -22,7 +22,7 @@ function varargout = ImageProcessing(varargin)
 
 % Edit the above text to modify the response to help ImageProcessing
 
-% Last Modified by GUIDE v2.5 21-Feb-2019 10:40:12
+% Last Modified by GUIDE v2.5 04-Mar-2019 00:29:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,58 +43,31 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+function h = histo(im)
+    im = uint8(im);
+    h = zeros(1,256);
+    for i=1:size(im,1)
+        for j=1:size(im,2)
+            h(im(i, j)+1) = h(im(i, j)+1) + 1;
+        end
+    end
 
 % --- Executes just before ImageProcessing is made visible.
 function ImageProcessing_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to ImageProcessing (see VARARGIN)
-
-% Choose default command line output for ImageProcessing
 handles.output = hObject;
-
-% Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes ImageProcessing wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
 % --- Outputs from this function are returned to the command line.
-function varargout = ImageProcessing_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
+function varargout = ImageProcessing_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
-
-
 function path_Callback(hObject, eventdata, handles)
-% hObject    handle to path (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of path as text
-%        str2double(get(hObject,'String')) returns contents of path as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function path_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to path (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 % --- Executes on button press in btn_OpenImage.
 function btn_OpenImage_Callback(hObject, eventdata, handles)
@@ -106,16 +79,22 @@ img = imread(name); % Read the image
 set(handles.path,'string',name); % Set the path label to image path
 set(handles.txXrange,'string',size(img,1)); % Set the Xrange editText to row length
 set(handles.txYrange,'string',size(img,2)); % Set the Yrange editText to column length
-axes(handles.axesImg); % Set the axes to image
+cla(handles.axesHstAfter); % Clear the axes of Histogram (after)
+axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
 imshow(img); % Showing the image
 
 % --- Executes on button press in btn_Grayscale.
 function btn_Grayscale_Callback(hObject, eventdata, handles)
 global img;
 if(size(img,3) == 3) % Checking if the image consists of 3 layers
+    axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
+    bar(histo(img)); % Showing the histogram of image
     % Put each R G B array to each variable
     R = img(:,:,1);
-    G = img(:,:,2); 
+    G = img(:,:,2);
     B = img(:,:,3);
     % Sum the R, G, B channel
     sum_R = sum(R);
@@ -126,47 +105,43 @@ if(size(img,3) == 3) % Checking if the image consists of 3 layers
     y = sum_G / (sum_R + sum_G + sum_B);
     z = sum_B / (sum_R + sum_G + sum_B);
     % Formula to get a grayscale image with the comparison R : G : B
-    img = x * R + y * G + z * B; 
-    imshow(img); %Showing the image
+    img = x * R + y * G + z * B;
+    axes(handles.axesHstAfter); % Set the axes to axes histogram (after)
+    bar(histo(img)); % Showing the histogram of image
+    axes(handles.axesImg); % Set the axes to axes image
+    imshow(uint8(img)); %Showing the image
 end
 
 % --- Executes on button press in btnPercentBright.
 function btnPercentBright_Callback(hObject, eventdata, handles)
 global img;
-img = double(img);
 brightVal = str2double(get(handles.txPercentBright, 'String')); %Get the bright value from editText
 if(brightVal > 100 || brightVal < -100) % Check if the input invalid
     msgbox('Please enter a value between -100 and 100', 'Error','error'); % Show error message
-else
+elseif(brightVal~=0)
+    axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
+    bar(histo(img)); % Showing the histogram of image
+    img = double(img);
     if(brightVal > 0)
         % If the bright value (+) then it will increase the image brightness by
         % multiplying each pixel with bright value
         img = img*((100 + brightVal) / 100);
-    else
+    elseif(brightVal < 0)
         % If the bright value (-) then it will decrease the image brightness by
         % divide each pixel with bright value
         img = img/((100 + abs(brightVal)) / 100); 
     end
+    axes(handles.axesHstAfter); % Set the axes to axes histogram (after)
+    bar(histo(img)); % Showing the histogram of image
     viewImg = uint8(img); % Change the image data type from double to uint8
+    axes(handles.axesImg); % Set the axes to axes image
     imshow(viewImg); % Showing the image
 end
 
 function txPercentBright_Callback(hObject, eventdata, handles)
-% hObject    handle to txPercentBright (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txPercentBright as text
-%        str2double(get(hObject,'String')) returns contents of txPercentBright as a double
 
 % --- Executes during object creation, after setting all properties.
 function txPercentBright_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txPercentBright (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -174,112 +149,57 @@ end
 % --- Executes on button press in btnPercentBright.
 function btnValueBright_Callback(hObject, eventdata, handles)
 global img;
-img = double(img);
 brightVal = str2double(get(handles.txValueBright, 'String')); % Get the bright value from editText
 if(brightVal > 100 || brightVal < -100) % Check if the input invalid
     msgbox('Please enter a value between -100 and 100', 'Error','error'); % Show error message
-else
+elseif(brightVal~=0)
+    axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
+    bar(histo(img)); % Showing the histogram of image
+    img = double(img);
     img = img + brightVal; % Sum the bright value to each pixel of the image
+    axes(handles.axesHstAfter); % Set the axes to axes histogram (after)
+    bar(histo(uint8(img))); % Showing the histogram of image
     viewImg = uint8(img); % Change the image data type from double to uint8
+    axes(handles.axesImg); % Set the axes to axes image
     imshow(viewImg); % Showing the image
 end
 
 function txValueBright_Callback(hObject, eventdata, handles)
-% hObject    handle to txValueBright (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txValueBright as text
-%        str2double(get(hObject,'String')) returns contents of txValueBright as a double
 
 % --- Executes during object creation, after setting all properties.
 function txValueBright_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txValueBright (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 function txXrange_Callback(hObject, eventdata, handles)
-% hObject    handle to txXrange (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txXrange as text
-%        str2double(get(hObject,'String')) returns contents of txXrange as a double
 
 % --- Executes during object creation, after setting all properties.
 function txXrange_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txXrange (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 function txYrange_Callback(hObject, eventdata, handles)
-% hObject    handle to txYrange (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txYrange as text
-%        str2double(get(hObject,'String')) returns contents of txYrange as a double
 
 % --- Executes during object creation, after setting all properties.
 function txYrange_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txYrange (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 function txXstart_Callback(hObject, eventdata, handles)
-% hObject    handle to txXstart (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txXstart as text
-%        str2double(get(hObject,'String')) returns contents of txXstart as a double
 
 % --- Executes during object creation, after setting all properties.
 function txXstart_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txXstart (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 function txYstart_Callback(hObject, eventdata, handles)
-% hObject    handle to txYstart (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txYstart as text
-%        str2double(get(hObject,'String')) returns contents of txYstart as a double
 
 % --- Executes during object creation, after setting all properties.
 function txYstart_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txYstart (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -296,7 +216,7 @@ yEnd = str2double(get(handles.txYend, 'String')); % Get the value of Y End from 
 if(xStart < 1 || xStart > xRange || xEnd < 1 || xEnd > xRange) % Check if the input invalid
     msgbox(sprintf('Please enter a value between 0 and %s for X range', num2str(xRange)), 'Error','error'); % Show error message
 elseif(yStart < 1 || yStart > yRange || yEnd < 1 || yEnd > yRange)
-    msgbox(sprintf('Please enter a value between 0 and %s for Y range', num2str(xRange)), 'Error','error'); % Show error message
+    msgbox(sprintf('Please enter a value between 0 and %s for Y range', num2str(yRange)), 'Error','error'); % Show error message
 else
     img = double(img(xStart:xEnd, yStart:yEnd, :)); % Cropping image
     viewImg = uint8(img);
@@ -306,41 +226,17 @@ else
 end
 
 function txXend_Callback(hObject, eventdata, handles)
-% hObject    handle to txXend (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txXend as text
-%        str2double(get(hObject,'String')) returns contents of txXend as a double
 
 % --- Executes during object creation, after setting all properties.
 function txXend_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txXend (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 function txYend_Callback(hObject, eventdata, handles)
-% hObject    handle to txYend (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of txYend as text
-%        str2double(get(hObject,'String')) returns contents of txYend as a double
-
 % --- Executes during object creation, after setting all properties.
-function txYend_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to txYend (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function txYend_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -401,6 +297,9 @@ function btnReset_Callback(hObject, eventdata, handles)
 global name;
 global img;
 img = imread(name); % Read the image
+axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+cla(handles.axesHstAfter); % Clear the axes of Histogram (after)
 axes(handles.axesImg); % Set the axes to image
 set(handles.txXrange,'string',size(img,1)); % Set the Xrange editText to row length
 set(handles.txYrange,'string',size(img,2)); % Set the Yrange editText to column length
@@ -408,6 +307,44 @@ imshow(img); % Showing the image
 
 % --- Executes on button press in btnHisteq.
 function btnHisteq_Callback(hObject, eventdata, handles)
-% hObject    handle to btnHisteq (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+global img;
+img = uint8(img);
+if(size(img,3) == 3) % Checking if the image consists of 3 layers
+    % Put each R G B array to each variable
+    R = img(:,:,1);
+    G = img(:,:,2); 
+    B = img(:,:,3);
+    % Formula to get a grayscale image with the comparison R : G : B
+    img = (0.2126 * R) + (0.7152 * G) + (0.0772 * B); 
+end
+
+rows = size(img,1); % Get the image-row length
+cols = size(img,2); % Get the image-column length
+h = histo(img); % Calculating histogram of original image
+h = h/(rows*cols);
+
+axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
+bar(h); % Showing the histogram of image
+
+% Calculate the cumulative distribution
+cdf = zeros(1,256); % Create array for cumulative distribution
+for i=1:size(h,2)
+    cdf(i) = sum(h(1:i));
+end
+
+sk = uint8(256 * cdf); % finding transfer values
+
+% applying transfered values for each pixels
+new_img = zeros(rows,cols); % Create array for new image
+for i=1:rows
+    for j=1:cols
+        new_img(i, j) = sk(img(i, j)+1) - 1;
+    end
+end
+
+img = uint8(new_img);
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image

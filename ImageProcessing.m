@@ -22,7 +22,7 @@ function varargout = ImageProcessing(varargin)
 
 % Edit the above text to modify the response to help ImageProcessing
 
-% Last Modified by GUIDE v2.5 04-Mar-2019 00:29:17
+% Last Modified by GUIDE v2.5 12-Mar-2019 13:19:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -42,13 +42,31 @@ else
     gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
+% This is convolution function
+function new_img = conv(img, kernel)
+    cols = size(img, 1); % Get the column length
+    rows = size(img,2); % Get the row length
+    new_img = zeros(cols, rows, 3); % Create new image with size of cols X rows X 3
+    img = double(padarray(img,[1 1], 0, 'both')); % Add padding to original image
+    % Do the convolution
+    for i=2:cols+1
+        for j=2:rows+1
+            new = zeros(3, 3, 3); % Create array 'new' to count every pixel
+            for k=1:3
+                new(:, :, k) = img(i-1:i+1, j-1:j+1, k) .* kernel; % Multiple the image with kernel
+            end
+            new_img(i-1,j-1,:) = sum(sum(new)); % New image assigned with convolution result
+        end
+    end
+    new_img = uint8(new_img); % Parse the type to uint8
 
+% This is function to count the histogram of image
 function h = histo(im)
-    im = uint8(im);
-    h = zeros(1,256);
+    h = zeros(1,256); % Create array with size 1 X 256
+    % Count the histogram of image
     for i=1:size(im,1)
         for j=1:size(im,2)
-            h(im(i, j)+1) = h(im(i, j)+1) + 1;
+            h(im(i, j)+1) = h(im(i, j)+1) + 1; % Count every pixel value
         end
     end
 
@@ -343,6 +361,44 @@ for i=1:rows
 end
 
 img = uint8(new_img);
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image
+
+
+% --- Executes on button press in btnBlur.
+function btnBlur_Callback(hObject, eventdata, handles)
+global img;
+kernel = [0.0625, 0.125, 0.0625; 0.125, 0.25, 0.125; 0.0625, 0.125, 0.0625]; % Blur kernel
+img = conv(img, kernel); % Call the conv function (defined on top of code)
+
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image
+
+% --- Executes on button press in btnSharp.
+function btnSharp_Callback(hObject, eventdata, handles)
+global img;
+kernel = [0 -1 0; -1 5 -1; 0 -1 0]; % Sharp kernel
+img = conv(img, kernel); % Call the conv function (defined on top of code)
+
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image
+
+
+% --- Executes on button press in btnEdge.
+function btnEdge_Callback(hObject, eventdata, handles)
+global img;
+kernel = [1 0 -1; 1 0 -1; 1 0 -1]; % Edge detection kernel
+img = conv(img, kernel);% Call the conv function (defined on top of code)
+
 axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
 bar(histo(img)); % Showing the histogram of image
 

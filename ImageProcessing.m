@@ -22,7 +22,7 @@ function varargout = ImageProcessing(varargin)
 
 % Edit the above text to modify the response to help ImageProcessing
 
-% Last Modified by GUIDE v2.5 12-Mar-2019 13:19:33
+% Last Modified by GUIDE v2.5 13-Apr-2019 13:58:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -99,7 +99,7 @@ set(handles.txXrange,'string',size(img,1)); % Set the Xrange editText to row len
 set(handles.txYrange,'string',size(img,2)); % Set the Yrange editText to column length
 cla(handles.axesHstAfter); % Clear the axes of Histogram (after)
 axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
-bar(histo(img)); % Showing the histogram of image
+% bar(histo(img)); % Showing the histogram of image
 
 axes(handles.axesImg); % Set the axes to axes image
 imshow(img); % Showing the image
@@ -125,7 +125,7 @@ if(size(img,3) == 3) % Checking if the image consists of 3 layers
     % Formula to get a grayscale image with the comparison R : G : B
     img = x * R + y * G + z * B;
     axes(handles.axesHstAfter); % Set the axes to axes histogram (after)
-    bar(histo(img)); % Showing the histogram of image
+%     bar(histo(img)); % Showing the histogram of image
     axes(handles.axesImg); % Set the axes to axes image
     imshow(uint8(img)); %Showing the image
 end
@@ -138,7 +138,7 @@ if(brightVal > 100 || brightVal < -100) % Check if the input invalid
     msgbox('Please enter a value between -100 and 100', 'Error','error'); % Show error message
 elseif(brightVal~=0)
     axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
-    bar(histo(img)); % Showing the histogram of image
+%     bar(histo(img)); % Showing the histogram of image
     img = double(img);
     if(brightVal > 0)
         % If the bright value (+) then it will increase the image brightness by
@@ -150,7 +150,7 @@ elseif(brightVal~=0)
         img = img/((100 + abs(brightVal)) / 100); 
     end
     axes(handles.axesHstAfter); % Set the axes to axes histogram (after)
-    bar(histo(img)); % Showing the histogram of image
+%     bar(histo(img)); % Showing the histogram of image
     viewImg = uint8(img); % Change the image data type from double to uint8
     axes(handles.axesImg); % Set the axes to axes image
     imshow(viewImg); % Showing the image
@@ -172,11 +172,11 @@ if(brightVal > 100 || brightVal < -100) % Check if the input invalid
     msgbox('Please enter a value between -100 and 100', 'Error','error'); % Show error message
 elseif(brightVal~=0)
     axes(handles.axesHstBefore); % Set the axes to axes histogram (before)
-    bar(histo(img)); % Showing the histogram of image
+%     bar(histo(img)); % Showing the histogram of image
     img = double(img);
     img = img + brightVal; % Sum the bright value to each pixel of the image
     axes(handles.axesHstAfter); % Set the axes to axes histogram (after)
-    bar(histo(uint8(img))); % Showing the histogram of image
+%     bar(histo(uint8(img))); % Showing the histogram of image
     viewImg = uint8(img); % Change the image data type from double to uint8
     axes(handles.axesImg); % Set the axes to axes image
     imshow(viewImg); % Showing the image
@@ -367,7 +367,6 @@ bar(histo(img)); % Showing the histogram of image
 axes(handles.axesImg); % Set the axes to axes image
 imshow(img); % Showing the image
 
-
 % --- Executes on button press in btnBlur.
 function btnBlur_Callback(hObject, eventdata, handles)
 global img;
@@ -392,13 +391,214 @@ bar(histo(img)); % Showing the histogram of image
 axes(handles.axesImg); % Set the axes to axes image
 imshow(img); % Showing the image
 
-
 % --- Executes on button press in btnEdge.
 function btnEdge_Callback(hObject, eventdata, handles)
 global img;
 kernel = [1 0 -1; 1 0 -1; 1 0 -1]; % Edge detection kernel
 img = conv(img, kernel);% Call the conv function (defined on top of code)
 
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image
+
+function txThrsR_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function txThrsR_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function txThrsG_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function txThrsG_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function txThrsB_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function txThrsB_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes on button press in btnThrsSegment.
+function btnThrsSegment_Callback(hObject, eventdata, handles)
+global img;
+thrsR = str2double(get(handles.txThrsR, 'String')); % Get the value of Threshold for R channel from editText
+thrsG = str2double(get(handles.txThrsG, 'String')); % Get the value of Threshold for R channel from editText
+thrsB = str2double(get(handles.txThrsB, 'String')); % Get the value of Threshold for R channel from editText
+rows = size(img,1); % Get the row length
+cols = size(img,2); % Get the column length
+for i=2 : rows-1
+    for j=1 : cols
+        if (img(i, j, 1) < thrsR) 
+            img(i, j, 1) = 0;
+        end
+        if (img(i, j, 2) < thrsG) 
+            img(i, j, 2) = 0;
+        end
+        if (img(i, j, 3) < thrsB) 
+            img(i, j, 3) = 0;
+        end
+    end
+end
+img = uint8(img);
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image
+
+function txXseed_Callback(hObject, eventdata, handles)
+% hObject    handle to txXseed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of txXseed as text
+%        str2double(get(hObject,'String')) returns contents of txXseed as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function txXseed_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to txXseed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function txYseed_Callback(hObject, eventdata, handles)
+% hObject    handle to txYseed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of txYseed as text
+%        str2double(get(hObject,'String')) returns contents of txYseed as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function txYseed_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to txYseed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function txThrsseed_Callback(hObject, eventdata, handles)
+% hObject    handle to txThrsseed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of txThrsseed as text
+%        str2double(get(hObject,'String')) returns contents of txThrsseed as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function txThrsseed_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to txThrsseed (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in btnSeedSegment.
+function btnSeedSegment_Callback(hObject, eventdata, handles)
+% hObject    handle to btnSeedSegment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function txThresholdTebalTipis_Callback(hObject, eventdata, handles)
+% hObject    handle to txThresholdTebalTipis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of txThresholdTebalTipis as text
+%        str2double(get(hObject,'String')) returns contents of txThresholdTebalTipis as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function txThresholdTebalTipis_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to txThresholdTebalTipis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in btnTebal.
+function btnTebal_Callback(hObject, eventdata, handles)
+global img;
+filter = [100 100 100]; % Filter Penebalan
+threshold = str2double(get(handles.txThresholdTebalTipis, 'String')); % Get the value of Threshold from editText
+rows = size(img,1); % Get the row length
+cols = size(img,2); % Get the column length
+for i=2 : rows-1
+    for j=1 : cols
+        if(img(i, j) > threshold)
+            l = 1;
+            for k=i-1 : i+1
+                img(k, j) = max(img(k, j), filter(l));
+                l = l + 1;
+            end
+        end
+    end
+end
+img = uint8(img);
+axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
+bar(histo(img)); % Showing the histogram of image
+
+axes(handles.axesImg); % Set the axes to axes image
+imshow(img); % Showing the image
+
+% --- Executes on button press in btnTipis.
+function btnTipis_Callback(hObject, eventdata, handles)
+global img;
+filter = [100 100 100]; % Filter Penebalan
+threshold = str2double(get(handles.txThresholdTebalTipis, 'String')); % Get the value of Threshold from editText
+rows = size(img,1); % Get the row length
+cols = size(img,2); % Get the column length
+for i=2 : rows-1
+    for j=1 : cols
+        if(img(i, j) > threshold)
+            l = 1;
+            val = zeros(1,3);
+            for k=i-1 : i+1
+                val(l) = min(img(k, j), filter(l));
+                l = l + 1;
+            end
+            img(i, j) = min(val);
+        end
+    end
+end
+img = uint8(img);
 axes(handles.axesHstAfter); % Set the axes to axes histogram (before)
 bar(histo(img)); % Showing the histogram of image
 
